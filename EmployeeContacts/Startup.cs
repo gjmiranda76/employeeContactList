@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using EmployeeContacts.Data;
+using EmployeeContacts.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace EmployeeContacts
@@ -73,8 +74,93 @@ namespace EmployeeContacts
                 using (var context = serviceScope.ServiceProvider.GetService<EmployeeContactsContext>())
                 {
                     context.Database.Migrate();
+                    EnsureDatabaseIsSeeded(context);
                 }
             }
-        } 
+        }
+
+        private static void EnsureDatabaseIsSeeded(EmployeeContactsContext context)
+        {
+            if (!context.Departments.Any())
+            {
+                var hr = new Department
+                {
+                    Id = 1,
+                    DepartmentName = "Human Resources"
+                };
+
+                var finance = new Department
+                {
+                    Id = 2,
+                    DepartmentName = "Finance"
+                };
+
+                context.Departments.Add(hr);
+                context.Departments.Add(finance);
+                context.SaveChanges();
+
+                var employee1 = new Employee
+                {
+                    Id = 1,
+                    DepartmentId = hr.Id,
+                    FirstName = "Mike",
+                    LastName = "Jones",
+                    Title = "HR Representitive",
+                    Email = "mike.jones@abc.com",
+                    Phone = "555-123-4567"
+                };
+
+                var employee2 = new Employee
+                {
+                    Id = 2,
+                    DepartmentId = hr.Id,
+                    FirstName = "Jane",
+                    LastName = "Smith",
+                    Title = "HR Manager",
+                    Email = "jane.smith@abc.com",
+                    Phone = "555-123-1111"
+                };
+
+                var employee3 = new Employee
+                {
+                    Id = 3,
+                    DepartmentId = finance.Id,
+                    FirstName = "Hector",
+                    LastName = "Flores",
+                    Title = "CPA",
+                    Email = "hector.flores@abc.com",
+                    Phone = "555-123-2222"
+                };
+
+                var employee4 = new Employee
+                {
+                    Id = 4,
+                    DepartmentId = finance.Id,
+                    FirstName = "Emily",
+                    LastName = "Radnor",
+                    Title = "CPA",
+                    Email = "emilyr@abc.com",
+                    Phone = "555-123-4444"
+                };
+
+                var employee5 = new Employee
+                {
+                    Id = 5,
+                    DepartmentId = finance.Id,
+                    FirstName = "Sarah",
+                    LastName = "Jackson",
+                    Title = "CPA Intern",
+                    Email = "sjackson@abc.com",
+                    Phone = "555-123-5555"
+                };
+
+                context.Employees.Add(employee1);
+                context.Employees.Add(employee2);
+                context.Employees.Add(employee3);
+                context.Employees.Add(employee4);
+                context.Employees.Add(employee5);
+                context.SaveChanges();
+            }
+        }
     }
 }
