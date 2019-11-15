@@ -35,6 +35,8 @@ namespace EmployeeContacts
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            InitializeDatabase(app);
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -58,5 +60,21 @@ namespace EmployeeContacts
                     pattern: "{controller=Home}/{action=Index}/{id?}");
             });
         }
+
+        private static void InitializeDatabase(IApplicationBuilder app)
+        {
+            // Ensure that DB Migrations are run at startup so there
+            // doesn't need to be a separate step for this when first 
+            // installing and running
+            using (var serviceScope = app.ApplicationServices
+                .GetRequiredService<IServiceScopeFactory>()
+                .CreateScope())
+            {
+                using (var context = serviceScope.ServiceProvider.GetService<EmployeeContactsContext>())
+                {
+                    context.Database.Migrate();
+                }
+            }
+        } 
     }
 }
