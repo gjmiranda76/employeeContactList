@@ -55,6 +55,9 @@ artifacts/
 #**/Properties/launchSettings.json
 .vscode/
 *.db
+*.db-shm
+*.db-wal
+
 
 # StyleCop
 StyleCopReport.xml
