@@ -41,6 +41,11 @@ namespace EmployeeContacts.Managers
             return _context.Departments.FirstOrDefault(d => d.Id == deptId);
         }
 
+        public Department GetDepartmentByName(string deptName)
+        {
+            return _context.Departments.FirstOrDefault(d => d.DepartmentName == deptName);
+        }
+
         public void UpdateDepartmemt(Department dept)
         {
             if (DepartmentExists(dept.Id))
@@ -57,12 +62,12 @@ namespace EmployeeContacts.Managers
             if (dept != null)
             {
                 _context.Remove(dept);
+                _context.SaveChanges();
             }
         }
         private bool DepartmentExists(int id)
         {
             return _context.Departments.Any(d => d.Id == id);
         }
-
     }
 }
