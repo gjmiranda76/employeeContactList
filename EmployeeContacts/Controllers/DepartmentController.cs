@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EmployeeContacts.Data;
+using EmployeeContacts.Managers;
 using EmployeeContacts.Models;
 
 namespace EmployeeContacts.Controllers
@@ -13,34 +14,20 @@ namespace EmployeeContacts.Controllers
     public class DepartmentController : Controller
     {
         private readonly EmployeeContactsContext _context;
+        private readonly EmployeeManager _employeeMgr;
+        private readonly DepartmentManager _deptMgr;
 
         public DepartmentController(EmployeeContactsContext context)
         {
             _context = context;
+            _employeeMgr = new EmployeeManager(_context);
+            _deptMgr = new DepartmentManager(_context);
         }
 
         // GET: Department
         public async Task<IActionResult> Index()
         {
             return View(await _context.Departments.ToListAsync());
-        }
-
-        // GET: Department/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var department = await _context.Departments
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (department == null)
-            {
-                return NotFound();
-            }
-
-            return View(department);
         }
 
         // GET: Department/Create
@@ -116,15 +103,16 @@ namespace EmployeeContacts.Controllers
             return View(department);
         }
 
-        public async Task<IActionResult> Contacts(int? id)
+        public IActionResult Contacts(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var employeeContactsContext = _context.Employees.Where(em => em.DepartmentId == id).Include(e => e.Department);
-            return View(await employeeContactsContext.ToListAsync());
+          //  var employeeContactsContext = _context.Employees.Where(em => em.DepartmentId == id).Include(e => e.Department);
+            var employeeContactsContext = _employeeMgr.GetAllEmployeesForDepartment((int)id);
+            return View(employeeContactsContext);
         }
 
 

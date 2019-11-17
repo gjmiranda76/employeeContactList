@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EmployeeContacts.Data;
+using EmployeeContacts.Managers;
 using EmployeeContacts.Models;
 
 namespace EmployeeContacts.Controllers
@@ -13,10 +14,13 @@ namespace EmployeeContacts.Controllers
     public class EmployeeController : Controller
     {
         private readonly EmployeeContactsContext _context;
+        private readonly EmployeeManager _employeeMgr;
+
 
         public EmployeeController(EmployeeContactsContext context)
         {
             _context = context;
+           _employeeMgr = new EmployeeManager(_context);
         }
 
         // GET: Employee
@@ -24,37 +28,6 @@ namespace EmployeeContacts.Controllers
         {
             var employeeContactsContext = _context.Employees.Include(e => e.Department);
             return View(await employeeContactsContext.ToListAsync());
-        }
-
-        // GET: Employee/2
-        public async Task<IActionResult> DeptContacts(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var employeeContactsContext = _context.Employees.Where(em => em.DepartmentId == id).Include(e => e.Department);
-            return View(await employeeContactsContext.ToListAsync());
-        }
-
-        // GET: Employee/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var employee = await _context.Employees
-                .Include(e => e.Department)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (employee == null)
-            {
-                return NotFound();
-            }
-
-            return View(employee);
         }
 
         // GET: Employee/Create
