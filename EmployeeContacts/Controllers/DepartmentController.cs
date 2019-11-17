@@ -25,9 +25,10 @@ namespace EmployeeContacts.Controllers
         }
 
         // GET: Department
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            return View(await _context.Departments.ToListAsync());
+            
+            return View(_deptMgr.GetAllDepartments());
         }
 
         // GET: Department/Create
@@ -41,26 +42,25 @@ namespace EmployeeContacts.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,DepartmentName")] Department department)
+        public IActionResult Create([Bind("Id,DepartmentName")] Department department)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(department);
-                await _context.SaveChangesAsync();
+                _deptMgr.AddDepartment(department.DepartmentName);
                 return RedirectToAction(nameof(Index));
             }
             return View(department);
         }
 
         // GET: Department/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public IActionResult Edit(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var department = await _context.Departments.FindAsync(id);
+            var department = _deptMgr.GetDepartmentById((int)id);
             if (department == null)
             {
                 return NotFound();
@@ -73,7 +73,7 @@ namespace EmployeeContacts.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,DepartmentName")] Department department)
+        public IActionResult Edit(int id, [Bind("Id,DepartmentName")] Department department)
         {
             if (id != department.Id)
             {
@@ -84,8 +84,7 @@ namespace EmployeeContacts.Controllers
             {
                 try
                 {
-                    _context.Update(department);
-                    await _context.SaveChangesAsync();
+                    _deptMgr.UpdateDepartmemt(department);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -110,22 +109,20 @@ namespace EmployeeContacts.Controllers
                 return NotFound();
             }
 
-          //  var employeeContactsContext = _context.Employees.Where(em => em.DepartmentId == id).Include(e => e.Department);
             var employeeContactsContext = _employeeMgr.GetAllEmployeesForDepartment((int)id);
             return View(employeeContactsContext);
         }
 
 
         // GET: Department/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public IActionResult Delete(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var department = await _context.Departments
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var department = _deptMgr.GetDepartmentById((int)id);
             if (department == null)
             {
                 return NotFound();
@@ -137,17 +134,15 @@ namespace EmployeeContacts.Controllers
         // POST: Department/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public IActionResult DeleteConfirmed(int id)
         {
-            var department = await _context.Departments.FindAsync(id);
-            _context.Departments.Remove(department);
-            await _context.SaveChangesAsync();
+            _deptMgr.DeleteDepartmemtById((int)id);
             return RedirectToAction(nameof(Index));
         }
 
         private bool DepartmentExists(int id)
         {
-            return _context.Departments.Any(e => e.Id == id);
+            return _deptMgr.GetAllDepartments().Any(e => e.Id == id);
         }
     }
 }
