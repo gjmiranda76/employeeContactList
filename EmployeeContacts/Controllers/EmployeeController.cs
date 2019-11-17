@@ -35,7 +35,13 @@ namespace EmployeeContacts.Controllers
         // GET: Employee/Create
         public IActionResult Create()
         {
-            ViewData["DepartmentId"] = new SelectList(_deptMgr.GetAllDepartments(), "Id", "Id");
+            var selectList = new SelectList(_deptMgr.GetAllDepartments(), "Id", "Id");
+            foreach (var sListItem in selectList)
+            {
+                sListItem.Text = _deptMgr.GetDepartmentById(Int32.Parse(sListItem.Value)).DepartmentName;
+            }
+
+            ViewData["DepartmentId"] = selectList;
             return View();
         }
 
@@ -51,6 +57,7 @@ namespace EmployeeContacts.Controllers
                 _employeeMgr.AddEmployee(employee);
                 return RedirectToAction(nameof(Index));
             }
+
             ViewData["DepartmentId"] = new SelectList(_deptMgr.GetAllDepartments(), "Id", "Id", employee.DepartmentId);
             return View(employee);
         }
@@ -68,7 +75,14 @@ namespace EmployeeContacts.Controllers
             {
                 return NotFound();
             }
-            ViewData["DepartmentId"] = new SelectList(_deptMgr.GetAllDepartments(), "Id", "Id", employee.DepartmentId);
+
+            var selectList = new SelectList(_deptMgr.GetAllDepartments(), "Id", "Id");
+            foreach (var sListItem in selectList)
+            {
+                sListItem.Text = _deptMgr.GetDepartmentById(Int32.Parse(sListItem.Value)).DepartmentName;
+            }
+
+            ViewData["DepartmentId"] = selectList;
             return View(employee);
         }
 
@@ -103,6 +117,7 @@ namespace EmployeeContacts.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+
             ViewData["DepartmentId"] = new SelectList(_deptMgr.GetAllDepartments(), "Id", "Id", employee.DepartmentId);
             return View(employee);
         }

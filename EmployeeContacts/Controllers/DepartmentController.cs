@@ -109,6 +109,7 @@ namespace EmployeeContacts.Controllers
                 return NotFound();
             }
 
+            ViewData["DepartmentName"] = _deptMgr.GetDepartmentById((int)id).DepartmentName;
             var employeeContactsContext = _employeeMgr.GetAllEmployeesForDepartment((int)id);
             return View(employeeContactsContext);
         }
