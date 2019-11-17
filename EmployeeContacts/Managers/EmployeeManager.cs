@@ -1,6 +1,9 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
+using System.Threading.Tasks;
 using EmployeeContacts.Data;
 using EmployeeContacts.Models;
 
@@ -31,6 +34,10 @@ namespace EmployeeContacts.Managers
             return _context.Employees.ToList();
         }
 
+        public IIncludableQueryable<Employee, Department> GetAllEmployeesForDisplay()
+        {
+            return _context.Employees.Include(e => e.Department);
+        }
         public List<Employee> GetAllEmployeesForDepartment(int deptId)
         {
             return _context.Employees.Where(e => e.DepartmentId == deptId).ToList();

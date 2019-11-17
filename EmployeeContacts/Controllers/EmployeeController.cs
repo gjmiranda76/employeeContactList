@@ -15,25 +15,27 @@ namespace EmployeeContacts.Controllers
     {
         private readonly EmployeeContactsContext _context;
         private readonly EmployeeManager _employeeMgr;
+        private readonly DepartmentManager _deptMgr;
 
 
         public EmployeeController(EmployeeContactsContext context)
         {
             _context = context;
            _employeeMgr = new EmployeeManager(_context);
+            _deptMgr = new DepartmentManager(_context);
         }
 
         // GET: Employee
         public async Task<IActionResult> Index()
         {
-            var employeeContactsContext = _context.Employees.Include(e => e.Department);
-            return View(await employeeContactsContext.ToListAsync());
+            var employees = _employeeMgr.GetAllEmployeesForDisplay();
+            return View(await employees.ToListAsync());
         }
 
         // GET: Employee/Create
         public IActionResult Create()
         {
-            ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "Id");
+            ViewData["DepartmentId"] = new SelectList(_deptMgr.GetAllDepartments(), "Id", "Id");
             return View();
         }
 
@@ -42,32 +44,31 @@ namespace EmployeeContacts.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,FirstName,LastName,Title,Email,Phone,DepartmentId")] Employee employee)
+        public IActionResult Create([Bind("Id,FirstName,LastName,Title,Email,Phone,DepartmentId")] Employee employee)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(employee);
-                await _context.SaveChangesAsync();
+                _employeeMgr.AddEmployee(employee);
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "Id", employee.DepartmentId);
+            ViewData["DepartmentId"] = new SelectList(_deptMgr.GetAllDepartments(), "Id", "Id", employee.DepartmentId);
             return View(employee);
         }
 
         // GET: Employee/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public IActionResult Edit(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var employee = await _context.Employees.FindAsync(id);
+            var employee = _employeeMgr.GetEmployeeById((int)id);
             if (employee == null)
             {
                 return NotFound();
             }
-            ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "Id", employee.DepartmentId);
+            ViewData["DepartmentId"] = new SelectList(_deptMgr.GetAllDepartments(), "Id", "Id", employee.DepartmentId);
             return View(employee);
         }
 
@@ -76,7 +77,7 @@ namespace EmployeeContacts.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,FirstName,LastName,Title,Email,Phone,DepartmentId")] Employee employee)
+        public IActionResult Edit(int id, [Bind("Id,FirstName,LastName,Title,Email,Phone,DepartmentId")] Employee employee)
         {
             if (id != employee.Id)
             {
@@ -87,8 +88,7 @@ namespace EmployeeContacts.Controllers
             {
                 try
                 {
-                    _context.Update(employee);
-                    await _context.SaveChangesAsync();
+                    _employeeMgr.UpdateEmployee(employee);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -103,21 +103,19 @@ namespace EmployeeContacts.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "Id", employee.DepartmentId);
+            ViewData["DepartmentId"] = new SelectList(_deptMgr.GetAllDepartments(), "Id", "Id", employee.DepartmentId);
             return View(employee);
         }
 
         // GET: Employee/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public IActionResult Delete(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var employee = await _context.Employees
-                .Include(e => e.Department)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var employee = _employeeMgr.GetEmployeeById((int)id);
             if (employee == null)
             {
                 return NotFound();
@@ -129,17 +127,15 @@ namespace EmployeeContacts.Controllers
         // POST: Employee/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public IActionResult DeleteConfirmed(int id)
         {
-            var employee = await _context.Employees.FindAsync(id);
-            _context.Employees.Remove(employee);
-            await _context.SaveChangesAsync();
+            _employeeMgr.DeleteEmployeeById((int)id);
             return RedirectToAction(nameof(Index));
         }
 
         private bool EmployeeExists(int id)
         {
-            return _context.Employees.Any(e => e.Id == id);
+            return _employeeMgr.GetAllEmployees().Any(e => e.Id == id);
         }
     }
 }
