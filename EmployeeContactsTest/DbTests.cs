@@ -128,6 +128,7 @@ namespace EmployeeContactsTest
             EmployeeManager.AddEmployee(emp1);
             Assert.True(DbContext.Employees.Any(e => e.Email == emp1.Email));
         }
+
         [Fact]
         public void AddEmployeeBadDeptIdTest()
         {
@@ -149,6 +150,148 @@ namespace EmployeeContactsTest
             Assert.Throws<DbUpdateException>(() => EmployeeManager.AddEmployee(emp1));
         }
 
+        [Fact]
+        public void GetAllEmployeesTest()
+        {
+            SetupEmployees();
+            var employees = EmployeeManager.GetAllEmployees();
+
+            Assert.True(employees.Count == 5);
+        }
+
+        [Fact]
+        public void GetAllEmployeesForDepartmentTest()
+        {
+            SetupEmployees();
+
+            var dept1Employees = EmployeeManager.GetAllEmployeesForDepartment(1);
+            Assert.True(dept1Employees.Count == 2);
+
+            var dept2Employees = EmployeeManager.GetAllEmployeesForDepartment(2);
+            Assert.True(dept2Employees.Count == 3);
+        }
+
+        [Fact]
+        public void GetEmployeeByIdTest()
+        {
+            SetupEmployees();
+
+            var emp3 = EmployeeManager.GetEmployeeById(3);
+            Assert.True(emp3.Email == "hector.flores@abc.com");
+        }
+
+        [Fact]
+        public void GetEmployeeByEmailTest()
+        {
+            SetupEmployees();
+
+            var emp3 = EmployeeManager.GetEmployeeByEmail("hector.flores@abc.com");
+            Assert.True(emp3.Id == 3);
+        }
+
+        [Fact]
+        public void UpdateEmployeeTest()
+        {
+            SetupEmployees();
+    
+            var jane = EmployeeManager.GetEmployeeByEmail("jane.smith@abc.com");
+            Assert.True(jane.Title == "HR Manager");
+
+            jane.Title = "VP of HR";
+            EmployeeManager.UpdateEmployee(jane);
+           
+            var janeVP = EmployeeManager.GetEmployeeByEmail("jane.smith@abc.com");
+            Assert.True(janeVP.Title == "VP of HR");
+        }
+
+        [Fact]
+        public void DeleteEmployeeTest()
+        {
+            SetupEmployees();
+
+            EmployeeManager.DeleteEmployeeById(3);
+            Assert.True(DbContext.Employees.Count() == 4);
+            Assert.False(DbContext.Employees.Any(e => e.Email == "hector.flores@abc.com"));
+
+        }
+        #endregion
+
+        #region Private Methods
+        private void SetupEmployees()
+        {
+            SetupDepartments();
+
+            Assert.True(DbContext.Employees.Count() == 0);
+
+            var employee1 = new Employee
+            {
+                Id = 1,
+                DepartmentId = 1,
+                FirstName = "Mike",
+                LastName = "Jones",
+                Title = "HR Representitive",
+                Email = "mike.jones@abc.com",
+                Phone = "555-123-4567"
+            };
+
+            var employee2 = new Employee
+            {
+                Id = 2,
+                DepartmentId = 1,
+                FirstName = "Jane",
+                LastName = "Smith",
+                Title = "HR Manager",
+                Email = "jane.smith@abc.com",
+                Phone = "555-123-1111"
+            };
+
+            var employee3 = new Employee
+            {
+                Id = 3,
+                DepartmentId = 2,
+                FirstName = "Hector",
+                LastName = "Flores",
+                Title = "CPA",
+                Email = "hector.flores@abc.com",
+                Phone = "555-123-2222"
+            };
+
+            var employee4 = new Employee
+            {
+                Id = 4,
+                DepartmentId = 2,
+                FirstName = "Emily",
+                LastName = "Radnor",
+                Title = "CPA",
+                Email = "emilyr@abc.com",
+                Phone = "555-123-4444"
+            };
+
+            var employee5 = new Employee
+            {
+                Id = 5,
+                DepartmentId = 2,
+                FirstName = "Sarah",
+                LastName = "Jackson",
+                Title = "CPA Intern",
+                Email = "sjackson@abc.com",
+                Phone = "555-123-5555"
+            };
+
+            EmployeeManager.AddEmployee(employee1);
+            EmployeeManager.AddEmployee(employee2);
+            EmployeeManager.AddEmployee(employee3);
+            EmployeeManager.AddEmployee(employee4);
+            EmployeeManager.AddEmployee(employee5);
+
+            Assert.True(DbContext.Employees.Count() == 5);
+            Assert.True(DbContext.Employees.Any(e => e.Email == employee1.Email));
+            Assert.True(DbContext.Employees.Any(e => e.Email == employee2.Email));
+            Assert.True(DbContext.Employees.Any(e => e.Email == employee3.Email));
+            Assert.True(DbContext.Employees.Any(e => e.Email == employee4.Email));
+            Assert.True(DbContext.Employees.Any(e => e.Email == employee5.Email));
+
+        }
         private void SetupDepartments()
         {
             Assert.True(DbContext.Departments.Count() == 0);
